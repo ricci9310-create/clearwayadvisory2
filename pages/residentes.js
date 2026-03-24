@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { useAppContext } from '../context/AppContext';
 import Modal from '../components/Modal';
 import Badge from '../components/Badge';
@@ -6,7 +7,8 @@ import Badge from '../components/Badge';
 const emptyForm = { nombre: '', cedula: '', torre: '', apto: '', coeficiente: '', telefono: '', email: '', estado: 'Activo' };
 
 export default function Residentes() {
-  const { residentes, addResidente, updateResidente, deleteResidente } = useAppContext();
+  const { residentes, addResidente, updateResidente, deleteResidente, importResidentes } = useAppContext();
+  const fileInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -44,6 +46,38 @@ export default function Residentes() {
     }
   };
 
+  const handleImportExcel = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const workbook = XLSX.read(evt.target.result, { type: 'binary' });
+      const sheetName = workbook.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      const nuevos = rows.map(row => ({
+        nombre: String(row.nombre || row.Nombre || row.NOMBRE || '').trim(),
+        cedula: String(row.cedula || row.Cedula || row.CEDULA || row['Cédula'] || '').trim(),
+        torre: String(row.torre || row.Torre || row.TORRE || '').trim(),
+        apto: String(row.apto || row.Apto || row.APTO || row.apartamento || row.Apartamento || row.APARTAMENTO || '').trim(),
+        coeficiente: parseFloat(row.coeficiente || row.Coeficiente || row.COEFICIENTE || 0),
+        telefono: String(row.telefono || row.Telefono || row.TELEFONO || row['Teléfono'] || '').trim(),
+        email: String(row.email || row.Email || row.EMAIL || row.correo || row.Correo || '').trim(),
+        estado: 'Activo',
+      })).filter(r => r.nombre);
+
+      if (nuevos.length > 0) {
+        importResidentes(nuevos);
+        alert(`Se importaron ${nuevos.length} copropietarios exitosamente.`);
+      } else {
+        alert('No se encontraron registros válidos en el archivo. Asegúrese de que el Excel tenga columnas: nombre, cedula, torre, apto, coeficiente, telefono, email.');
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -51,12 +85,27 @@ export default function Residentes() {
           <h1 className="text-2xl font-bold text-gray-900">Copropietarios</h1>
           <p className="text-gray-500 text-sm mt-1">{residentes.length} registrados</p>
         </div>
-        <button
-          onClick={() => { setForm(emptyForm); setEditingId(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
-        >
-          + Nuevo Copropietario
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
+          >
+            Importar Excel
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleImportExcel}
+            className="hidden"
+          />
+          <button
+            onClick={() => { setForm(emptyForm); setEditingId(null); setShowModal(true); }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
+            + Nuevo Copropietario
+          </button>
+        </div>
       </div>
 
       {/* Search */}

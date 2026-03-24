@@ -32,8 +32,8 @@ export default function Layout({ children }) {
               <span className="text-blue-900 font-bold text-sm">PH</span>
             </div>
             <div>
-              <h1 className="text-white font-bold text-sm leading-tight">Los Samanes PH</h1>
-              <p className="text-blue-300 text-xs">Jamundí, Valle</p>
+              <h1 className="text-white font-bold text-sm leading-tight">El Privilegio PH</h1>
+              <p className="text-blue-300 text-xs">Propiedad Horizontal</p>
             </div>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white">
@@ -69,9 +69,8 @@ export default function Layout({ children }) {
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="bg-blue-700/30 rounded-lg p-3">
             <p className="text-blue-200 text-xs">Conjunto Residencial</p>
-            <p className="text-white text-sm font-semibold">Los Samanes</p>
-            <p className="text-blue-300 text-xs">NIT: 900.123.456-7</p>
-            <p className="text-blue-300 text-xs">Jamundí, Valle del Cauca</p>
+            <p className="text-white text-sm font-semibold">El Privilegio</p>
+            <p className="text-blue-300 text-xs">Propiedad Horizontal</p>
           </div>
         </div>
       </aside>
